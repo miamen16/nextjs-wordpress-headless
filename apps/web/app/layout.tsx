@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import "./globals.css";
 
@@ -15,7 +16,21 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <header className="site-header">
+          <div className="site-header-inner">
+            <Link className="site-logo" href="/">
+              Headless Store
+            </Link>
+            <nav className="site-nav" aria-label="Main navigation">
+              <Link href="/products">Products</Link>
+              <Link href="/blog">Blog</Link>
+              <Link href="/cart">Cart</Link>
+            </nav>
+          </div>
+        </header>
+        {children}
+      </body>
     </html>
   );
 }
