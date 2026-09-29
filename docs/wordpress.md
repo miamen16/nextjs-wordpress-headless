@@ -1,57 +1,91 @@
-# WordPress setup
+# WordPress + WooCommerce setup
 
-The frontend expects a WordPress installation to provide the CMS and GraphQL API.
+The frontend uses WordPress as the CMS and **WooCommerce as the commerce engine**. Products are not stored in a custom post type created by this repository.
 
 ## Required plugins
 
-1. Install and activate WPGraphQL.
-2. Install and activate the repository plugin at apps/wordpress/plugins/headless-api/headless-api.php.
-3. Confirm the GraphQL endpoint is available at:
-   https://your-cms-domain.com/graphql
+1. Install and activate WooCommerce.
+2. Install and activate WPGraphQL.
+3. Install and activate **WPGraphQL for WooCommerce (WooGraphQL)**.
+4. Activate the repository's small integration plugin at:
+   `apps/wordpress/plugins/headless-api/headless-api.php`
+5. Confirm the GraphQL endpoint is available at:
+   `https://your-cms-domain.com/graphql`
+
+WooGraphQL extends WPGraphQL with WooCommerce products, pricing, inventory, cart, customer, order, and related commerce data. citeturn0search0turn0search4
 
 ## Product model
 
-The Headless API plugin registers:
+WooCommerce owns the product catalog.
 
-- Post type: product
-- GraphQL type: Product
-- GraphQL collection: products
-- Product fields: title, content, excerpt, featured image, price
+The Next.js application queries the WooCommerce product types exposed through WooGraphQL, including:
 
-The product price is managed from the Product Details box in the WordPress editor.
+- Product ID and slug
+- Name
+- Description and short description
+- Product image
+- Price
+- Regular price
+- Sale price
+- Sale status
+- Stock status
+- Product type
+
+Simple and variable product fields are handled through GraphQL type fragments. WooGraphQL's product documentation uses the same Product, SimpleProduct, and VariableProduct model. citeturn0search2
 
 ## Create a product
 
 In WordPress:
 
-1. Open Products → Add New.
-2. Enter the product title.
-3. Add the product description.
-4. Set a featured image.
-5. Enter the price in Product Details.
+1. Open **Products → Add New**.
+2. Create the product using WooCommerce.
+3. Set the product type.
+4. Set the price and inventory.
+5. Add product images.
 6. Publish the product.
 
-The Next.js application will fetch the product through WPGraphQL.
+The product will then be available to the Next.js storefront through GraphQL.
+
+## Next.js routes
+
+The repository currently provides:
+
+- `/products`
+- `/products/[slug]`
+
+Both routes now read WooCommerce data instead of the custom Product post type.
 
 ## Environment variables
 
-In apps/web/.env.local:
+In `apps/web/.env.local`:
 
     NEXT_PUBLIC_SITE_URL=http://localhost:3000
     WORDPRESS_URL=https://cms.example.com
     WORDPRESS_GRAPHQL_URL=https://cms.example.com/graphql
     WORDPRESS_MEDIA_HOST=cms.example.com
 
-For local WordPress, use the actual hostname and port used by your WordPress installation.
-
 ## Verify GraphQL
 
-Before opening /products, verify that WPGraphQL is responding and that the Product type is present in the GraphQL schema.
+Use WPGraphiQL or another GraphQL client to confirm that the WooCommerce Product types and queries are present in the schema before testing the Next.js storefront. WooGraphQL recommends inspecting the live schema while developing headless WooCommerce integrations. citeturn0search12
 
 If the product query fails, check:
 
+- WooCommerce is active.
 - WPGraphQL is active.
+- WooGraphQL is active.
 - Headless API is active.
-- The Product post type appears in the WordPress admin.
 - The GraphQL endpoint URL is correct.
 - The WordPress server allows requests from the Next.js server.
+
+## Future commerce features
+
+After the product catalog is stable, the next implementation should use WooGraphQL for:
+
+- Add to cart
+- Cart persistence/session handling
+- Variable product selections
+- Checkout
+- Customer accounts
+- Orders
+
+WooGraphQL documents cart queries and mutations for headless storefronts, including `addToCart` and cart item operations. citeturn0search5
