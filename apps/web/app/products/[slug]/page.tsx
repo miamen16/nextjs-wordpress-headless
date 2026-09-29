@@ -13,20 +13,19 @@ export async function generateMetadata({
   const product = await getProductBySlug(slug);
 
   if (!product) {
-    return {
-      title: "Product not found",
-    };
+    return { title: "Product not found" };
   }
+
+  const description = product.shortDescription || product.description;
+  const cleanDescription = description
+    ? description.replace(/<[^>]+>/g, "").slice(0, 160)
+    : `View ${product.name}`;
 
   return {
     title: product.name,
-    description: product.description
-      ? product.description.replace(/<[^>]+>/g, "").slice(0, 160)
-      : `View ${product.name}`,
-    openGraph: product.featuredImageUrl
-      ? {
-          images: [{ url: product.featuredImageUrl }],
-        }
+    description: cleanDescription,
+    openGraph: product.image
+      ? { images: [{ url: product.image.sourceUrl }] }
       : undefined,
   };
 }
@@ -43,10 +42,10 @@ export default async function ProductPage({ params }: ProductPageProps) {
     <main className="container">
       <article className="product-detail">
         <div>
-          {product.featuredImageUrl ? (
+          {product.image ? (
             <img
-              src={product.featuredImageUrl}
-              alt={product.name}
+              src={product.image.sourceUrl}
+              alt={product.image.altText || product.name}
               className="product-detail-image"
             />
           ) : (
@@ -57,12 +56,26 @@ export default async function ProductPage({ params }: ProductPageProps) {
         </div>
 
         <div className="product-detail-content">
-          <p className="eyebrow">Product</p>
+          <p className="eyebrow">WooCommerce Product</p>
           <h1>{product.name}</h1>
+
+          {product.onSale && product.regularPrice ? (
+            <p className="product-regular-price">
+              {product.regularPrice}
+            </p>
+          ) : null}
 
           {product.price ? (
             <p className="product-detail-price">{product.price}</p>
           ) : null}
+
+          <p className="product-stock">
+            {product.stockStatus === "IN_STOCK"
+              ? "In stock"
+              : product.stockStatus === "OUT_OF_STOCK"
+                ? "Out of stock"
+                : "Stock status unavailable"}
+          </p>
 
           {product.description ? (
             <div
