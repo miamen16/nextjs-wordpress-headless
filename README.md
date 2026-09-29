@@ -1,36 +1,75 @@
 # Next.js + WordPress Headless
 
-Production-oriented monorepo starter for a Next.js frontend with WordPress as a headless CMS/backend.
+Production-oriented monorepo starter for a headless WordPress application.
 
 ## Architecture
 
-- `apps/web` — Next.js App Router frontend
-- `apps/wordpress` — WordPress custom backend code
-- `packages/types` — shared TypeScript types
-- WPGraphQL is the planned primary content API
-- Next.js owns the public UI, routing and SEO
-- WordPress owns content and backend business logic
+- apps/web — Next.js frontend
+- apps/wordpress — WordPress custom plugin code
+- packages/types — shared TypeScript types
+- docs — architecture, deployment, and WordPress setup
+
+The current frontend uses WPGraphQL for server-side content fetching.
+
+## Products
+
+The first end-to-end feature is implemented:
+
+WordPress Product → WPGraphQL → Next.js
+
+Frontend routes:
+
+- /products
+- /products/[slug]
+
+WordPress provides the Product post type, featured image, description, and price.
+
+See docs/wordpress.md for CMS setup.
 
 ## Requirements
 
 - Node.js 22+
 - pnpm 10+
-- WordPress with WPGraphQL for the CMS/API
+- WordPress
+- WPGraphQL
 
-## Setup
+## Local setup
 
-```bash
-pnpm install
-cp apps/web/.env.example apps/web/.env.local
-pnpm dev
-```
+Install dependencies:
 
-The WordPress application is intentionally represented by custom code only. Install WordPress separately and place the plugin code under its `wp-content/plugins` directory.
+    pnpm install
 
-## Environment
+Create the frontend environment file:
 
-See `apps/web/.env.example`.
+    cp apps/web/.env.example apps/web/.env.local
 
-## Status
+Set WORDPRESS_URL, WORDPRESS_GRAPHQL_URL, and WORDPRESS_MEDIA_HOST to your WordPress installation.
 
-Initial architecture scaffold. Product queries, authentication, WooCommerce integration and webhook-driven revalidation will be added incrementally.
+Start Next.js:
+
+    pnpm dev
+
+## WordPress
+
+Activate the Headless API plugin from:
+
+apps/wordpress/plugins/headless-api/headless-api.php
+
+Copy the plugin into your WordPress installation under wp-content/plugins/headless-api/.
+
+Install and activate WPGraphQL, then create products from the WordPress admin.
+
+## Production direction
+
+The repository is being built incrementally toward:
+
+- typed GraphQL operations
+- authentication
+- WooCommerce integration
+- search and filtering
+- webhook-based cache revalidation
+- automated tests
+- CI/CD
+- production deployment
+
+Custom WordPress code should remain in the repository rather than being edited directly in a production WordPress installation.
