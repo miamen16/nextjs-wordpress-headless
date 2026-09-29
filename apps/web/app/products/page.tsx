@@ -4,7 +4,7 @@ import { getProducts } from "@/lib/wordpress/queries/products";
 
 export const metadata: Metadata = {
   title: "Products",
-  description: "Browse our products.",
+  description: "Browse our WooCommerce products.",
 };
 
 export default async function ProductsPage() {
@@ -13,24 +13,24 @@ export default async function ProductsPage() {
   return (
     <main className="container">
       <header className="page-header">
-        <p className="eyebrow">Catalog</p>
+        <p className="eyebrow">Shop</p>
         <h1>Products</h1>
-        <p>Products are managed in WordPress and rendered by Next.js.</p>
+        <p>Products are managed by WooCommerce and rendered by Next.js.</p>
       </header>
 
       {products.length === 0 ? (
         <div className="empty-state">
           <h2>No products yet</h2>
-          <p>Create a Product in WordPress and it will appear here.</p>
+          <p>Create a product in WooCommerce and it will appear here.</p>
         </div>
       ) : (
         <div className="product-grid">
           {products.map((product) => (
             <article className="product-card" key={product.id}>
-              {product.featuredImageUrl ? (
+              {product.image ? (
                 <img
-                  src={product.featuredImageUrl}
-                  alt={product.name}
+                  src={product.image.sourceUrl}
+                  alt={product.image.altText || product.name}
                   className="product-image"
                 />
               ) : (
@@ -41,21 +41,31 @@ export default async function ProductsPage() {
 
               <div className="product-card-content">
                 <p className="product-price">
-                  {product.price ? product.price : "Price on request"}
+                  {product.price || "Price on request"}
                 </p>
+
                 <h2>
                   <Link href={`/products/${product.slug}`}>
                     {product.name}
                   </Link>
                 </h2>
-                {product.description ? (
+
+                {product.shortDescription ? (
                   <p
                     className="product-excerpt"
                     dangerouslySetInnerHTML={{
-                      __html: product.description,
+                      __html: product.shortDescription,
                     }}
                   />
                 ) : null}
+
+                <p className="product-stock">
+                  {product.stockStatus === "IN_STOCK"
+                    ? "In stock"
+                    : product.stockStatus === "OUT_OF_STOCK"
+                      ? "Out of stock"
+                      : "Stock status unavailable"}
+                </p>
               </div>
             </article>
           ))}
