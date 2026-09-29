@@ -5,9 +5,18 @@ export type ProductSummary = {
   databaseId: number;
   name: string;
   slug: string;
+  type: string;
   description: string | null;
+  shortDescription: string | null;
   price: string | null;
-  featuredImageUrl: string | null;
+  regularPrice: string | null;
+  salePrice: string | null;
+  onSale: boolean;
+  stockStatus: string | null;
+  image: {
+    sourceUrl: string;
+    altText: string | null;
+  } | null;
 };
 
 type ProductsResponse = {
@@ -16,19 +25,45 @@ type ProductsResponse = {
   };
 };
 
+type ProductResponse = {
+  product: ProductSummary | null;
+};
+
+const productFields = `
+  id
+  databaseId
+  name
+  slug
+  type
+  description
+  shortDescription(format: RAW)
+  image {
+    sourceUrl
+    altText
+  }
+  ... on SimpleProduct {
+    onSale
+    price
+    regularPrice
+    salePrice
+    stockStatus
+  }
+  ... on VariableProduct {
+    onSale
+    price
+    regularPrice
+    salePrice
+    stockStatus
+  }
+`;
+
 export async function getProducts(): Promise<ProductSummary[]> {
   const data = await graphqlRequest<ProductsResponse>(
     `
       query GetProducts {
         products(first: 24) {
           nodes {
-            id
-            databaseId
-            name
-            slug
-            description
-            price
-            featuredImageUrl
+            ${productFields}
           }
         }
       }
@@ -41,28 +76,16 @@ export async function getProducts(): Promise<ProductSummary[]> {
 export async function getProductBySlug(
   slug: string,
 ): Promise<ProductSummary | null> {
-  const data = await graphqlRequest<ProductsResponse>(
+  const data = await graphqlRequest<ProductResponse>(
     `
-      query GetProductBySlug($slug: ID!) {
-        product(id: $slug, idType: SLUG) {
-          id
-          databaseId
-          name
-          slug
-          description
-          price
-          featuredImageUrl
+      query GetProductBySlug($slug: ID!, $idType: ProductIdTypeEnum) {
+        product(id: $slug, idType: $idType) {
+          ${productFields}
         }
       }
     `,
-    { slug },
-  ).catch((error: unknown) => {
-    if (error instanceof Error && error.message.includes("GraphQL errors")) {
-      return { products: { nodes: [] } };
-    }
+    { slug, idType: "SLUG" },
+  );
 
-    throw error;
-  });
-
-  return data.products.nodes[0] ?? null;
+  return data.product;
 }
