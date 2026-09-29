@@ -1,14 +1,12 @@
 <?php
 /**
  * Plugin Name: Headless API
- * Description: Custom API and content model for the Next.js headless frontend.
- * Version: 0.2.0
+ * Description: Small integration layer for the Next.js headless frontend.
+ * Version: 0.3.0
  * Requires PHP: 8.1
  */
 
 defined( 'ABSPATH' ) || exit;
-
-require_once __DIR__ . '/includes/products.php';
 
 add_action(
     'rest_api_init',
@@ -23,6 +21,7 @@ add_action(
                     return [
                         'ok'      => true,
                         'service' => 'wordpress',
+                        'commerce'=> 'woocommerce',
                     ];
                 },
             ]
