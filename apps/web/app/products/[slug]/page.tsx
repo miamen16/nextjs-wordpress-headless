@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/lib/wordpress/queries/products";
+import { AddToCartButton } from "./add-to-cart";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -68,6 +69,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
           {product.price ? (
             <p className="product-detail-price">{product.price}</p>
           ) : null}
+
+          <AddToCartButton productId={product.databaseId} disabled={product.stockStatus === "OUT_OF_STOCK"} />
 
           <p className="product-stock">
             {product.stockStatus === "IN_STOCK"
